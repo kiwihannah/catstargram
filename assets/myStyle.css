@@ -251,10 +251,12 @@ body{
 
 .my-float-1{
 	margin-top:10px;
+    width: 80px;
 }
 
 .my-float-2{
-	margin-top:80px;
+	margin-top:30px;
+    width: 80px;
 }
 
 .modal-login {
@@ -328,3 +330,6 @@ body{
     display: inline-block;
     margin: 100px auto;
 }
+
+.floating { position: fixed; right: 50%; top: 180px; margin-right: -720px; text-align:center; width: 120px; }
+.floating div:nth-child(1){ border:2px solid #ff3535; border-radius: 8px; } .floating div:nth-child(2){ border:2px solid #ff3535; border-radius: 8px; } .floating div:nth-child(3){ border:2px solid #ff3535; border-radius: 8px; }

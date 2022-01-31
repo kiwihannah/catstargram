@@ -28,19 +28,26 @@ router.post("/user/new", async (req, res) => { /* pw 유효성 비동기 구현 
 });
 
 /**
- * 1. login
+ * 1. login api/user/id_dup_ckeck?user_id_give=1234
  */
+router.get("/user/id_dup_ckeck/:user_id_give", async (req, res) => {
+  const user_id = req.params.user_id_give;
+  const user = await User.findOne({ user_id });
+  !user ? res.json({ msg: 1 }) : res.json({ msg: -1 })
+});
+
 router.post("/user/auth", async (req, res) => {
     const { user_id_give, user_pw_give } = req.body;
     const user = await User.findOne({ $and: [{ user_id: user_id_give }, { user_pw: user_pw_give }] });
     if (!user) {
-      res.status(200).send({ errorMessage: "입력하신 아이디 또는 패스워드가 알맞지 않습니다.", });
+      res.status(400).json({ msg: "입력하신 아이디 또는 패스워드가 알맞지 않습니다.", });
       return;
     } 
-    const token = jwt.sign({ user_id: user.user_id }, "hannah-key");
+    const token = jwt.sign({ user_id: user.user_id }, "hannah-key"); /* generate token */
     console.log("[Router : loginUser]");
-    res.send({ token, });
+    res.status(200).send({ msg: true, token, });
 });
+
 router.get("/user/me", auth, async (req, res) => {
   const { user } = res.locals;
   console.log(user);
@@ -50,13 +57,13 @@ router.get("/user/me", auth, async (req, res) => {
 /**
  * 1. read one (before update)
  */
- router.get("/user/info/:member_no", async (req, res) => {
-  const member_no = req.params.member_no;
-  const user = await User.findOne({ member_no });
+ router.get("/user/info/:user_id_give", async (req, res) => {
+  const user_id = req.params.user_id_give;
+  const user = await User.findOne({ user_id });
   if (!user) {
     return res.status(400).json({ success: false, errorMessage: "User not exist" });
   }
-  console.log("[Router : user info]", member_no);
+  console.log("[Router : user info]", user_id);
   res.json({ user });
 });
 

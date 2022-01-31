@@ -35,7 +35,8 @@ router.get("/posts", async function (req, res) {
   let count = await Post.countDocuments({});
   let maxPage = Math.ceil(count / limit);
 
-  const posts = await Post.find({}).sort({ ins_date : -1 }).skip(skip).limit(limit).exec();
+  const posts = await Post.find({}).sort({ ins_date : -1 });
+  //.skip(skip).limit(limit).exec();
 
   console.log("[Router : READ ALL]");
   res.json({ posts: posts, currentPage: page, maxPage: maxPage });

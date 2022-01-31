@@ -1,85 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
-<title>Bootstrap Sign up Form Horizontal</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> 
-<link href="./regiStyle.css" rel="stylesheet" />
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+	<title>catstargram 로그인/회원가입</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<link href="./regiStyle.css" rel="stylesheet" />
+	<script src="./user.js"></script>
 
 </head>
+
 <body>
 	<div class="signup-form horizontal">
 		<div class="form-horizontal">
 			<div class="col-xs-8 col-xs-offset-4">
-			<h2>Sign Up</h2>
-		</div>		
-        <div class="form-group">
-			<label class="control-label col-xs-4">Username</label>
-			<div class="col-xs-8">
-                <input type="text" class="form-control" name="username" required="required">
-            </div>        	
-        </div>
-		<div class="form-group">
-			<label class="control-label col-xs-4">Email Address</label>
-			<div class="col-xs-8">
-                <input type="email" class="form-control" name="email" required="required">
-            </div>        	
-        </div>
-		<div class="form-group">
-			<label class="control-label col-xs-4">Password</label>
-			<div class="col-xs-8">
-                <input type="password" class="form-control" name="password" required="required">
-            </div>        	
-        </div>
-		<div class="form-group">
-			<label class="control-label col-xs-4">Confirm Password</label>
-			<div class="col-xs-8">
-                <input type="password" class="form-control" name="confirm_password" required="required">
-            </div>        	
-        </div>
-		<div class="form-group">
-			<div class="col-xs-8 col-xs-offset-4">
-				<button type="submit" class="btn btn-primary btn-lg">Sign Up</button>
-			</div>  
-		</div>		      
-    </form>
-	<div class="text-center">
-		<!-- Button HTML (to Trigger Modal) -->
-		<a href="#myModal" class="trigger-btn" data-toggle="modal">이미 아이디가 있나요?</a>
-	</div>
-	
-	<!-- Modal HTML -->
-	<div id="myModal" class="modal fade">
-		<div class="modal-dialog modal-login">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h4 class="modal-title">Member Login</h4>	
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h2>가입하기</h2>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-xs-4">고양이 이름</label>
+				<div class="col-xs-8">
+					<input type="text" class="form-control" name="username" required="required" id="reg-cat-name">
 				</div>
-				<div class="modal-body">
-					<form action="/examples/actions/confirmation.php" method="post">
-						<div class="form-group">
-							<input type="text" class="form-control" name="username" placeholder="Username" required="required">		
-						</div>
-						<div class="form-group">
-							<input type="password" class="form-control" name="password" placeholder="Password" required="required">	
-						</div>        
-						<div class="form-group">
-							<button type="submit" class="btn btn-primary btn-lg btn-block login-btn">Login</button>
-						</div>
-					</form>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-xs-4">아이디</label>
+				<div class="col-xs-8">
+					<input type="text" class="form-control" name="email" required="required" id="reg-user-id" onblur="dup_check()">
 				</div>
-				<div class="modal-footer">
-					<a href="#">Forgot Password?</a>
+				<p id="id-alert"></p>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-xs-4">비밀번호</label>
+				<div class="col-xs-8">
+					<input type="password" class="form-control" name="password" required="required" id="reg-user-pw" onblur="validate_pw()">
+				</div>
+				<p id="pw-alert-1"></p>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-xs-4">비밀번호 확인</label>
+				<div class="col-xs-8">
+					<input type="password" class="form-control" name="confirm_password" required="required" id="reg-user-pw-confirm" onblur="dup_pw()">
+				</div>
+				<p id="pw-alert-2"></p>
+			</div>
+			<div class="form-group">
+				<div class="col-xs-8 col-xs-offset-4">
+					<button type="submit" class="btn btn-primary btn-lg" onclick="register()">가입하기</button>
 				</div>
 			</div>
 		</div>
-	</div>     
-</div>
+		<div class="text-center">
+			<!-- Button HTML (to Trigger Modal) -->
+			<a href="#myModal" class="trigger-btn" data-toggle="modal">이미 아이디가 있나요?</a>
+			<a href="/" class="trigger-btn" data-toggle="modal">홈으로</a>
+		</div>
+
+		<!-- Modal HTML -->
+		<div id="myModal" class="modal fade">
+			<div class="modal-dialog modal-login">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">catstargram ˙ᵕ˙</h4>
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<input type="text" class="form-control" name="username" placeholder="아이디"
+								required="required" id="login-user-id">
+						</div>
+						<div class="form-group">
+							<input type="password" class="form-control" name="password" placeholder="비밀번호"
+								required="required" id="login-user-pw">
+						</div>
+						<div class="form-group">
+							<button type="submit" class="btn btn-primary btn-lg btn-block login-btn" onclick="login()">로그인</button>
+						</div>
+					</div>
+					<footer>
+						<a href="" data-dismiss="modal" aria-hidden="true">가입하기</a>
+					</footer>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
+
 </html>

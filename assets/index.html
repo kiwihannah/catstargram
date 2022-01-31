@@ -22,8 +22,142 @@
    rel="stylesheet">
 <!------ Include the above in your HEAD tag ---------->
 
-<script src="/api.js"></script>
+<!-- <script src="./api.js"></script> -->
 
+<script>
+   function post_box() {
+      $("#post-box").show();
+   }
+
+   function getSelf(callback) {
+      $.ajax({
+         type: "GET",
+         url: "/api/user/me",
+         headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+         },
+         success: function (response) {
+            callback(response.user);
+         },
+         error: function (xhr, status, error) {
+            if (status == 401) {
+               alert("로그인이 필요합니다.");
+            } else {
+               localStorage.clear();
+               alert("알 수 없는 문제가 발생했습니다. 관리자에게 문의하세요.");
+            }
+            window.location.href = "/";
+         },
+      });
+   }
+
+   $(document).ready(function () {
+      $("cmt-box").hide();
+      const date = new Date().toLocaleDateString();
+      const time = new Date().toLocaleTimeString();
+      $("#date").append(date);
+      $("#time").append(time);
+
+      const user_id = "33";
+
+      $.ajax({
+         type: "GET",
+         url: "/api/user/info/" + user_id,
+         data: {
+            user_id_give: user_id,
+         },
+         success: function (response) {
+            const cat_name = response["user"]["cat_name"];
+            $("#cat-name").append(cat_name);
+         }
+      });
+
+      read_all();
+   });
+
+   function new_post() {
+      let title = "hannah";
+      let context = $("#context").val();
+      let img_url = "url";
+      let mention = "33";
+      $.ajax({
+         type: "POST",
+         url: "/api/posts",
+         data: {
+            title_give: title,
+            context_give: context,
+            img_url_give: img_url,
+            mention_give: mention,
+         },
+         success: function (response) {
+            alert("저장되었습니다.");
+            window.location.reload();
+         },
+      });
+   }
+
+   function read_all() {
+      $("#post-box").empty();
+      $.ajax({
+         type: "GET",
+         url: "/api/posts",
+         data: {},
+         success: function (response) {
+            $("#post-list").empty();
+            let posts = response["posts"];
+            console.log("[api : read all]");
+            let currentPage = response["currentPage"];
+            let maxPage = response["maxPage"];
+            for (let i = 0; i < posts.length; i++) {
+               addList(posts[i]);
+            }
+         },
+      });
+   }
+   function addList(posts) {
+      let temp_html = `<div class="timeline-body" style="padding-top: 10px;">
+                           <div class="timeline-header">
+                              <span class="userimage"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt=""></span>
+                              <span class="username"><a href="./userInfo.html">${posts["user_id"]}</a></span>
+                              <span class="date"> (${posts["ins_date"]})</span>
+                              <span style="float: right">
+                                 <button class="fa fa-pencil-square-o btn btn-outline-secondary">edit</button>
+                              </span>
+                           </div>
+                           <div class="timeline-content">
+                              <p>${posts["context"]}</p>
+                           </div>
+                           <div class="timeline-likes">
+                              <div class="stats-right">
+                                 <span class="stats-text">21 Comments</span>
+                              </div>
+                              <div class="stats">
+                                 <span class="fa-stack fa-fw stats-icon">
+                                    <i class="fa fa-circle fa-stack-2x text-primary"></i>
+                                    <i class="fa fa-thumbs-up fa-stack-1x fa-inverse"></i>
+                                 </span>
+                                 <span class="stats-total">4.3k</span>
+                              </div>
+                           </div>
+
+                           <div class="timeline-footer">
+                              <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i class="fa fa-thumbs-up fa-fw fa-lg m-r-3"></i>
+                                 따봉</a>
+                              <a href="javascript:cmt()" class="m-r-15 text-inverse-lighter"><i class="fa fa-comments fa-fw fa-lg m-r-3"></i>
+                                 댓글 펼치기</a>
+                           </div>
+                           `;
+      $("#post-list").append(temp_html);
+   }
+   
+   function newReply() {
+      
+   }
+
+   function cmt() {
+      $("#cmt-box").slideDown("slow");
+   }
+</script>
 
 <head>
    <!-- Required meta tags -->
@@ -35,439 +169,23 @@
 </head>
 
 <body>
-   <div class="float">
-      <div class="float">
-         <button onclick="javascript:window.location='./register.html'"
-             class="fa fa-user-circle-o fa-3x my-float-1 btn btn-outline-success"></button>
-         <button onclick="javascript:window.location='./newPost.html'" 
-             class="fa fa-pencil fa-3x my-float-2 btn btn-outline-warning"></button>
-     </div>
-   </div>
-   <div class="container">
-
-      <ul class="timeline">
-         <li>
-            <!-- begin timeline-time -->
-            <div class="timeline-time">
-               <span class="date">today</span>
-               <span class="time">04:20</span>
-            </div>
-            <!-- end timeline-time -->
-            <!-- begin timeline-icon -->
-            <div class="timeline-icon">
-               <a href="javascript:;">&nbsp;</a>
-            </div>
-            <!-- end timeline-icon -->
-            <!-- begin timeline-body -->
-            <div class="timeline-body">
-               <div class="timeline-header">
-                  <span class="userimage"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt=""></span>
-                  <span class="username"><a href="javascript:;">Hannah</a> <small></small></span>
-                  <span style="float: right"><button class="fa fa-pencil-square-o btn btn-outline-warning"></button></span>
+   <button onclick="getSelf()" class="btn btn-outline-danger">testing</button>
+   <button onclick="location.href='register.html'" class="btn btn-outline-success">가입</button>
+   <button onclick="location.href='newPost.html'" class="btn btn-outline-warning">새글</button>
+   <div class="timeline" id="post-list">
+      <div class="timeline-comment-box" id="cmt-box">
+         <div class="user"><img src="https://bootdey.com/img/Content/avatar/avatar6.png"></div>
+         <div class="input">
+            <form action="">
+               <div class="input-group">
+                  <input type="text" class="form-control rounded-corner" placeholder="악플달면 죽여버릴거야.">
+                  <span class="input-group-btn p-l-10">
+                     <button class="btn btn-primary f-s-12 rounded-corner" type="button">댓글달기</button>
+                  </span>
                </div>
-               <div class="timeline-content">
-                  <p>
-                     내 고양이가 제일이뻐
-                  </p>
-               </div>
-               <div class="timeline-likes">
-                  <div class="stats-right">
-                     <span class="stats-text">21 Comments</span>
-                  </div>
-                  <div class="stats">
-                     <span class="fa-stack fa-fw stats-icon">
-                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fa fa-thumbs-up fa-stack-1x fa-inverse"></i>
-                     </span>
-                     <span class="stats-total">4.3k</span>
-                  </div>
-               </div>
-
-               <div class="timeline-footer">
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-thumbs-up fa-fw fa-lg m-r-3"></i> 따봉</a>
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-comments fa-fw fa-lg m-r-3"></i> 댓글 펼치기</a>
-               </div>
-
-               <div class="timeline-comment-box">
-                  <div class="user"><img src="https://bootdey.com/img/Content/avatar/avatar6.png"></div>
-                  <div class="input">
-                     <form action="">
-                        <div class="input-group">
-                           <input type="text" class="form-control rounded-corner" placeholder="악플달면 죽여버릴거야.">
-                           <span class="input-group-btn p-l-10">
-                              <button class="btn btn-primary f-s-12 rounded-corner" type="button">댓글달기</button>
-                           </span>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-
-            </div>
-            <!-- end timeline-body -->
-         </li>
-         <li>
-            <!-- begin timeline-time -->
-            <div class="timeline-time">
-               <span class="date">today</span>
-               <span class="time">04:20</span>
-            </div>
-            <!-- end timeline-time -->
-            <!-- begin timeline-icon -->
-            <div class="timeline-icon">
-               <a href="javascript:;">&nbsp;</a>
-            </div>
-            <!-- end timeline-icon -->
-            <!-- begin timeline-body -->
-            <div class="timeline-body">
-               <div class="timeline-header">
-                  <span class="userimage"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt=""></span>
-                  <span class="username"><a href="javascript:;">Hannah</a> <small></small></span>
-               </div>
-               <div class="timeline-content">
-                  <p>
-                     내 고양이가 제일이뻐
-                  </p>
-               </div>
-               <div class="timeline-likes">
-                  <div class="stats-right">
-                     <span class="stats-text">21 Comments</span>
-                  </div>
-                  <div class="stats">
-                     <span class="fa-stack fa-fw stats-icon">
-                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fa fa-thumbs-up fa-stack-1x fa-inverse"></i>
-                     </span>
-                     <span class="stats-total">4.3k</span>
-                  </div>
-               </div>
-
-               <div class="timeline-footer">
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-thumbs-up fa-fw fa-lg m-r-3"></i> 따봉</a>
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-comments fa-fw fa-lg m-r-3"></i> 댓글 펼치기</a>
-               </div>
-
-               <div class="timeline-comment-box">
-                  <div class="user"><img src="https://bootdey.com/img/Content/avatar/avatar6.png"></div>
-                  <div class="input">
-                     <form action="">
-                        <div class="input-group">
-                           <input type="text" class="form-control rounded-corner" placeholder="악플달면 죽여버릴거야.">
-                           <span class="input-group-btn p-l-10">
-                              <button class="btn btn-primary f-s-12 rounded-corner" type="button">댓글달기</button>
-                           </span>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-
-            </div>
-            <!-- end timeline-body -->
-         </li>
-         <li>
-            <!-- begin timeline-time -->
-            <div class="timeline-time">
-               <span class="date">today</span>
-               <span class="time">04:20</span>
-            </div>
-            <!-- end timeline-time -->
-            <!-- begin timeline-icon -->
-            <div class="timeline-icon">
-               <a href="javascript:;">&nbsp;</a>
-            </div>
-            <!-- end timeline-icon -->
-            <!-- begin timeline-body -->
-            <div class="timeline-body">
-               <div class="timeline-header">
-                  <span class="userimage"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt=""></span>
-                  <span class="username"><a href="javascript:;">Hannah</a> <small></small></span>
-               </div>
-               <div class="timeline-content">
-                  <p>
-                     내 고양이가 제일이뻐
-                  </p>
-               </div>
-               <div class="timeline-likes">
-                  <div class="stats-right">
-                     <span class="stats-text">21 Comments</span>
-                  </div>
-                  <div class="stats">
-                     <span class="fa-stack fa-fw stats-icon">
-                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fa fa-thumbs-up fa-stack-1x fa-inverse"></i>
-                     </span>
-                     <span class="stats-total">4.3k</span>
-                  </div>
-               </div>
-
-               <div class="timeline-footer">
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-thumbs-up fa-fw fa-lg m-r-3"></i> 따봉</a>
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-comments fa-fw fa-lg m-r-3"></i> 댓글 펼치기</a>
-               </div>
-
-               <div class="timeline-comment-box">
-                  <div class="user"><img src="https://bootdey.com/img/Content/avatar/avatar6.png"></div>
-                  <div class="input">
-                     <form action="">
-                        <div class="input-group">
-                           <input type="text" class="form-control rounded-corner" placeholder="악플달면 죽여버릴거야.">
-                           <span class="input-group-btn p-l-10">
-                              <button class="btn btn-primary f-s-12 rounded-corner" type="button">댓글달기</button>
-                           </span>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-
-            </div>
-            <!-- end timeline-body -->
-         </li>
-         <li>
-            <!-- begin timeline-time -->
-            <div class="timeline-time">
-               <span class="date">today</span>
-               <span class="time">04:20</span>
-            </div>
-            <!-- end timeline-time -->
-            <!-- begin timeline-icon -->
-            <div class="timeline-icon">
-               <a href="javascript:;">&nbsp;</a>
-            </div>
-            <!-- end timeline-icon -->
-            <!-- begin timeline-body -->
-            <div class="timeline-body">
-               <div class="timeline-header">
-                  <span class="userimage"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt=""></span>
-                  <span class="username"><a href="javascript:;">Hannah</a> <small></small></span>
-               </div>
-               <div class="timeline-content">
-                  <p>
-                     내 고양이가 제일이뻐
-                  </p>
-               </div>
-               <div class="timeline-likes">
-                  <div class="stats-right">
-                     <span class="stats-text">21 Comments</span>
-                  </div>
-                  <div class="stats">
-                     <span class="fa-stack fa-fw stats-icon">
-                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fa fa-thumbs-up fa-stack-1x fa-inverse"></i>
-                     </span>
-                     <span class="stats-total">4.3k</span>
-                  </div>
-               </div>
-
-               <div class="timeline-footer">
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-thumbs-up fa-fw fa-lg m-r-3"></i> 따봉</a>
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-comments fa-fw fa-lg m-r-3"></i> 댓글 펼치기</a>
-               </div>
-
-               <div class="timeline-comment-box">
-                  <div class="user"><img src="https://bootdey.com/img/Content/avatar/avatar6.png"></div>
-                  <div class="input">
-                     <form action="">
-                        <div class="input-group">
-                           <input type="text" class="form-control rounded-corner" placeholder="악플달면 죽여버릴거야.">
-                           <span class="input-group-btn p-l-10">
-                              <button class="btn btn-primary f-s-12 rounded-corner" type="button">댓글달기</button>
-                           </span>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-
-            </div>
-            <!-- end timeline-body -->
-         </li>
-         <li>
-            <!-- begin timeline-time -->
-            <div class="timeline-time">
-               <span class="date">today</span>
-               <span class="time">04:20</span>
-            </div>
-            <!-- end timeline-time -->
-            <!-- begin timeline-icon -->
-            <div class="timeline-icon">
-               <a href="javascript:;">&nbsp;</a>
-            </div>
-            <!-- end timeline-icon -->
-            <!-- begin timeline-body -->
-            <div class="timeline-body">
-               <div class="timeline-header">
-                  <span class="userimage"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt=""></span>
-                  <span class="username"><a href="javascript:;">Hannah</a> <small></small></span>
-               </div>
-               <div class="timeline-content">
-                  <p>
-                     내 고양이가 제일이뻐
-                  </p>
-               </div>
-               <div class="timeline-likes">
-                  <div class="stats-right">
-                     <span class="stats-text">21 Comments</span>
-                  </div>
-                  <div class="stats">
-                     <span class="fa-stack fa-fw stats-icon">
-                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fa fa-thumbs-up fa-stack-1x fa-inverse"></i>
-                     </span>
-                     <span class="stats-total">4.3k</span>
-                  </div>
-               </div>
-
-               <div class="timeline-footer">
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-thumbs-up fa-fw fa-lg m-r-3"></i> 따봉</a>
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-comments fa-fw fa-lg m-r-3"></i> 댓글 펼치기</a>
-               </div>
-
-               <div class="timeline-comment-box">
-                  <div class="user"><img src="https://bootdey.com/img/Content/avatar/avatar6.png"></div>
-                  <div class="input">
-                     <form action="">
-                        <div class="input-group">
-                           <input type="text" class="form-control rounded-corner" placeholder="악플달면 죽여버릴거야.">
-                           <span class="input-group-btn p-l-10">
-                              <button class="btn btn-primary f-s-12 rounded-corner" type="button">댓글달기</button>
-                           </span>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-
-            </div>
-            <!-- end timeline-body -->
-         </li>
-         <li>
-            <!-- begin timeline-time -->
-            <div class="timeline-time">
-               <span class="date">today</span>
-               <span class="time">04:20</span>
-            </div>
-            <!-- end timeline-time -->
-            <!-- begin timeline-icon -->
-            <div class="timeline-icon">
-               <a href="javascript:;">&nbsp;</a>
-            </div>
-            <!-- end timeline-icon -->
-            <!-- begin timeline-body -->
-            <div class="timeline-body">
-               <div class="timeline-header">
-                  <span class="userimage"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt=""></span>
-                  <span class="username"><a href="javascript:;">Hannah</a> <small></small></span>
-               </div>
-               <div class="timeline-content">
-                  <p>
-                     내 고양이가 제일이뻐
-                  </p>
-               </div>
-               <div class="timeline-likes">
-                  <div class="stats-right">
-                     <span class="stats-text">21 Comments</span>
-                  </div>
-                  <div class="stats">
-                     <span class="fa-stack fa-fw stats-icon">
-                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fa fa-thumbs-up fa-stack-1x fa-inverse"></i>
-                     </span>
-                     <span class="stats-total">4.3k</span>
-                  </div>
-               </div>
-
-               <div class="timeline-footer">
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-thumbs-up fa-fw fa-lg m-r-3"></i> 따봉</a>
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-comments fa-fw fa-lg m-r-3"></i> 댓글 펼치기</a>
-               </div>
-
-               <div class="timeline-comment-box">
-                  <div class="user"><img src="https://bootdey.com/img/Content/avatar/avatar6.png"></div>
-                  <div class="input">
-                     <form action="">
-                        <div class="input-group">
-                           <input type="text" class="form-control rounded-corner" placeholder="악플달면 죽여버릴거야.">
-                           <span class="input-group-btn p-l-10">
-                              <button class="btn btn-primary f-s-12 rounded-corner" type="button">댓글달기</button>
-                           </span>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-
-            </div>
-            <!-- end timeline-body -->
-         </li>
-         <li>
-            <!-- begin timeline-time -->
-            <div class="timeline-time">
-               <span class="date">today</span>
-               <span class="time">04:20</span>
-            </div>
-            <!-- end timeline-time -->
-            <!-- begin timeline-icon -->
-            <div class="timeline-icon">
-               <a href="javascript:;">&nbsp;</a>
-            </div>
-            <!-- end timeline-icon -->
-            <!-- begin timeline-body -->
-            <div class="timeline-body">
-               <div class="timeline-header">
-                  <span class="userimage"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt=""></span>
-                  <span class="username"><a href="javascript:;">Hannah</a> <small></small></span>
-               </div>
-               <div class="timeline-content">
-                  <p>
-                     내 고양이가 제일이뻐
-                  </p>
-               </div>
-               <div class="timeline-likes">
-                  <div class="stats-right">
-                     <span class="stats-text">21 Comments</span>
-                  </div>
-                  <div class="stats">
-                     <span class="fa-stack fa-fw stats-icon">
-                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fa fa-thumbs-up fa-stack-1x fa-inverse"></i>
-                     </span>
-                     <span class="stats-total">4.3k</span>
-                  </div>
-               </div>
-
-               <div class="timeline-footer">
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-thumbs-up fa-fw fa-lg m-r-3"></i> 따봉</a>
-                  <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i
-                        class="fa fa-comments fa-fw fa-lg m-r-3"></i> 댓글 펼치기</a>
-               </div>
-
-               <div class="timeline-comment-box">
-                  <div class="user"><img src="https://bootdey.com/img/Content/avatar/avatar6.png"></div>
-                  <div class="input">
-                     <form action="">
-                        <div class="input-group">
-                           <input type="text" class="form-control rounded-corner" placeholder="악플달면 죽여버릴거야.">
-                           <span class="input-group-btn p-l-10">
-                              <button class="btn btn-primary f-s-12 rounded-corner" type="button">댓글달기</button>
-                           </span>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-
-            </div>
-            <!-- end timeline-body -->
-         </li>
-      </ul>
+            </form>
+         </div>                   
+      </div>
    </div>
 </body>
 
