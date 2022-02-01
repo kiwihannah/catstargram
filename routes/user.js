@@ -38,20 +38,20 @@ router.get("/user/id_dup_ckeck/:user_id_give", async (req, res) => {
 
 router.post("/user/auth", async (req, res) => {
     const { user_id_give, user_pw_give } = req.body;
-    const user = await User.findOne({ $and: [{ user_id: user_id_give }, { user_pw: user_pw_give }] });
+    const user = await User.findOne({ $and: [{ user_id: user_id_give }, { user_pw: user_pw_give }] }).exec();
     if (!user) {
       res.status(400).json({ msg: "입력하신 아이디 또는 패스워드가 알맞지 않습니다.", });
       return;
     } 
-    const token = jwt.sign({ user_id: user.user_id }, "hannah-key"); /* generate token */
-    console.log("[Router : loginUser]");
-    res.status(200).send({ msg: true, token, });
+    const token = jwt.sign({ userId: user.user_id }, "hannah-key"); /* generate token */
+    console.log("[Router : loginUser]", token);
+    res.send({ msg: true, user, token, });
 });
 
 router.get("/user/me", auth, async (req, res) => {
   const { user } = res.locals;
   console.log(user);
-  res.send({ user, });
+  res.status(200).send({ user, });
 });
 
 /**

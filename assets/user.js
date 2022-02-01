@@ -112,7 +112,8 @@ function login() {
         },
         success: function (response) {
             if (response['msg'] === true) {
-                window.location.replace("/")
+                localStorage.setItem("token", response["token"]);
+                window.location.replace("/");
             } else {
                 alert(response['msg']);
             }

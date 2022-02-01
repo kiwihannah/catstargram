@@ -25,11 +25,33 @@
 <!-- <script src="./api.js"></script> -->
 
 <script>
-   function post_box() {
-      $("#post-box").show();
+   
+   function logout() {
+      alert("로그아웃 되었습니다.");
+      localStorage.clear();
    }
+   $(document).on("click",".guideBox > a",function(){
+      if($(this).next().css("display")=="none"){
+        $(this).next().show();
+        $(this).children("span").text("[댓글 닫기]");
+      }else{
+        $(this).next().hide();
+        $(this).children("span").text("[댓글 열기]");
+      }
+   });
 
-   function getSelf(callback) {
+   $(document).on("click",".new",function(){
+      if($("#post-box").css("display")=="none"){
+        $("#post-box").show();
+        $(".new").text("입력창 닫기");
+      }else{
+         $("#post-box").hide();
+        $(".new").text("새 글 입력");
+      }
+   });
+
+
+   function getSelf() {
       $.ajax({
          type: "GET",
          url: "/api/user/me",
@@ -37,7 +59,8 @@
             authorization: `Bearer ${localStorage.getItem("token")}`,
          },
          success: function (response) {
-            callback(response.user);
+            let user_info = response["user"];
+            console.log(user_info);
          },
          error: function (xhr, status, error) {
             if (status == 401) {
@@ -52,19 +75,16 @@
    }
 
    $(document).ready(function () {
-      $("cmt-box").hide();
       const date = new Date().toLocaleDateString();
       const time = new Date().toLocaleTimeString();
       $("#date").append(date);
       $("#time").append(time);
 
-      const user_id = "33";
-
       $.ajax({
          type: "GET",
-         url: "/api/user/info/" + user_id,
+         url: "/api/user/info/" + "123asdcc",
          data: {
-            user_id_give: user_id,
+            user_id_give: "123asdcc",
          },
          success: function (response) {
             const cat_name = response["user"]["cat_name"];
@@ -97,13 +117,12 @@
    }
 
    function read_all() {
-      $("#post-box").empty();
+      $("#post-list").empty();
       $.ajax({
          type: "GET",
          url: "/api/posts",
          data: {},
          success: function (response) {
-            $("#post-list").empty();
             let posts = response["posts"];
             console.log("[api : read all]");
             let currentPage = response["currentPage"];
@@ -115,47 +134,51 @@
       });
    }
    function addList(posts) {
-      let temp_html = `<div class="timeline-body" style="padding-top: 10px;">
+      let temp_html = `<div class="timeline-body">
                            <div class="timeline-header">
+                              <input type="hidden" value="${posts["post_no"]}">
                               <span class="userimage"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt=""></span>
-                              <span class="username"><a href="./userInfo.html">${posts["user_id"]}</a></span>
+                              <span class="username"><a href="./userInfo.html">${posts["member_no"]}</a></span>
                               <span class="date"> (${posts["ins_date"]})</span>
+                              <span><a href="javascript:;" class="m-r-15 text-inverse-lighter"><i class="fa fa-thumbs-up fa-fw fa-lg m-r-3"></i>
+                                 따봉</a>
+                              <span>
+                              <span class="stats-total">( 4.3k )</span>
+                              
                               <span style="float: right">
-                                 <button class="fa fa-pencil-square-o btn btn-outline-secondary">edit</button>
+                                 <span class="stats-text">21 Comments</span>
+                                 <button class="fa fa-pencil-square-o btn btn-outline-secondary" >edit</button>
                               </span>
                            </div>
                            <div class="timeline-content">
                               <p>${posts["context"]}</p>
                            </div>
-                           <div class="timeline-likes">
-                              <div class="stats-right">
-                                 <span class="stats-text">21 Comments</span>
-                              </div>
-                              <div class="stats">
-                                 <span class="fa-stack fa-fw stats-icon">
-                                    <i class="fa fa-circle fa-stack-2x text-primary"></i>
-                                    <i class="fa fa-thumbs-up fa-stack-1x fa-inverse"></i>
-                                 </span>
-                                 <span class="stats-total">4.3k</span>
-                              </div>
-                           </div>
 
-                           <div class="timeline-footer">
-                              <a href="javascript:;" class="m-r-15 text-inverse-lighter"><i class="fa fa-thumbs-up fa-fw fa-lg m-r-3"></i>
-                                 따봉</a>
-                              <a href="javascript:cmt()" class="m-r-15 text-inverse-lighter"><i class="fa fa-comments fa-fw fa-lg m-r-3"></i>
-                                 댓글 펼치기</a>
+                           <div class="timeline-footer guideBox">
+                              <a onfocus="blur()" class="textbtn" class="m-r-15 text-inverse-lighter textbtn">
+                                 <i class="fa fa-comments fa-fw fa-lg m-r-3"></i><span>[댓글 열기]</span>
+                              </a>
+                              <div class="timeline-comment-box" style="margin: 20px; display: none; cursor;">
+                                 <div class="user"><img src="https://bootdey.com/img/Content/avatar/avatar6.png"></div>
+                                 <div class="input">
+                                    <form action="">
+                                       <div class="input-group">
+                                          <input type="text" class="form-control rounded-corner" placeholder="악플달면 죽여버릴거야.">
+                                          <span class="input-group-btn p-l-10">
+                                             <button class="btn btn-primary f-s-12 rounded-corner" type="button">댓글달기</button>
+                                          </span>
+                                       </div>
+                                    </form>
+                                 </div>                   
+                              </div>
                            </div>
+                           <hr/>
                            `;
       $("#post-list").append(temp_html);
    }
    
    function newReply() {
       
-   }
-
-   function cmt() {
-      $("#cmt-box").slideDown("slow");
    }
 </script>
 
@@ -169,22 +192,41 @@
 </head>
 
 <body>
+   <button onclick="logout()" class="btn btn-outline-danger">logout</button>
    <button onclick="getSelf()" class="btn btn-outline-danger">testing</button>
-   <button onclick="location.href='register.html'" class="btn btn-outline-success">가입</button>
-   <button onclick="location.href='newPost.html'" class="btn btn-outline-warning">새글</button>
-   <div class="timeline" id="post-list">
-      <div class="timeline-comment-box" id="cmt-box">
-         <div class="user"><img src="https://bootdey.com/img/Content/avatar/avatar6.png"></div>
-         <div class="input">
-            <form action="">
-               <div class="input-group">
-                  <input type="text" class="form-control rounded-corner" placeholder="악플달면 죽여버릴거야.">
-                  <span class="input-group-btn p-l-10">
-                     <button class="btn btn-primary f-s-12 rounded-corner" type="button">댓글달기</button>
-                  </span>
+   <button onclick="location.href='register.html'" class="btn btn-outline-success">로그인</button>
+   <button type="button" class="btn btn-outline-warning new">새 글 작성</button>
+   
+   <div class="timeline">
+      <div id="post-box" style="display: none;">
+         <div class="timeline-time">
+            <span class="date" id="date"></span><span class="time" id="time"></span>
+         </div>
+         <div class="timeline-icon">
+         </div>
+         <div class="timeline-body" style="height: 300px;">
+            <div class="timeline-header">
+               <a href="/api/user/info">
+                  <span class="userimage"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt=""></span>
+                  <span class="username" id="cat-name"></span>
+               </a>
+            </div>
+            <div class="timeline-content">
+               <textarea class="form-control" placeholder="당신의 고양이를 자랑해보세요" id="context"
+                  style="height: 150px"></textarea>
+               <div style="padding-top: 10px;">
+                  <input type="file">
+                <button type="button" class="btn btn-outline-info" style="float: right;" onclick="new_post()">게시글
+                     등록</button>
+                
                </div>
-            </form>
-         </div>                   
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="timeline">
+      <div id="post-list">
+
       </div>
    </div>
 </body>
