@@ -102,6 +102,7 @@ function login() {
         success: function (response) {
             if (response['msg'] === true) {
                 localStorage.setItem("token", response["token"]);
+                localStorage.setItem("user_id", response["user"]["user_id"]);
                 window.location.replace("/");
             } else {
                 alert("입력하신 아이디 또는 패스워드가 알맞지 않습니다.");

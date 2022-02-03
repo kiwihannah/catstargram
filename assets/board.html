@@ -10,125 +10,33 @@
 <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
     crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
-
-<script>
-    let page = 0; let post_no = 0;
-    
-    $(document).ready(function () {
-        read_all(); 
-    });
-
-    function logout() {
-        if (localStorage.getItem("user_id") === null) {
-            alert("이미 로그아웃 상태 입니다."); return;
-        }
-        alert("로그아웃 되었습니다.");
-        localStorage.clear();
-        window.location.href = "./board.html";
-    }
-
-    function isMember() {
-        let user_id = localStorage.getItem("user_id");
-        user_id !== null ? alert(`이미 로그인 된 상태입니다\n아이디: ${user_id}`) : window.location.href = "./register.html";
-    }
-
-    function getSelf() {
-        $.ajax({
-            type: "GET",
-            url: "/api/user/me",
-            headers: {
-                authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-            success: function (response) {
-                let user_info = response["user"];
-                localStorage.setItem("user_id", user_info["user_id"]);
-                console.log(localStorage.getItem("user_id"));
-            },
-            error: function (xhr, status, error) {
-                localStorage.clear();
-                if(confirm("로그인이 후 이용 가능합니다.\n로그인 하시겠습니까?")){
-                    window.location.href = "./register.html";
-                } else {
-                    window.location.href = "./board.html";
-                }
-            },
-        });
-    }
-
-    function read_all(page) {
-        if (page === 0) page = 1;
-        $.ajax({
-            type: "GET",
-            url: `/api/posts?page=${page}`,
-            data: {},
-            success: function (response) {
-                let posts = response["posts"];
-                let currentPage = response["currentPage"];
-                let maxPage = response["maxPage"];
-                pagination(currentPage, maxPage);
-                for (let i = 0; i < posts.length; i++) {
-                    addList(posts[i]);
-                }
-            },
-        });
-    }
-
-    function addList(posts) {
-        let user_id = localStorage.getItem("user_id"); let writer = "";
-        posts["user_id"] === user_id ? writer = "<strong>내가 쓴글</strong>" : writer = posts["user_id"];
-        let temp_html = `<tr>
-                            <td style="width: 10%;">${posts["post_no"]}</td>
-                            <td style="width: 10%;">${writer}</td>
-                            <td style="width: 40%;"><a href="javascript:goModify('${posts["post_no"]}')">${posts["title"]}</a></td>
-                            <td style="width: 20%;">${posts["ins_date"]}</td>
-                            <td style="width: 10%;">${posts["hit"]}</td>
-                            <td style="width: 10%;">${posts["like"]}</td>
-                        </tr>`;
-        $("#list").append(temp_html);
-    }
-
-    function goModify(post_no) {
-        getSelf();
-        localStorage.setItem("post_no", post_no);
-        window.location.href = "./modify.html";
-    }
-
-    function pagination(currentPage, maxPage) {
-        $("#page_nav").empty(); $("#list").empty();
-        let prevClass = "", nextClass = "";
-        if (currentPage === 1) prevClass = "disabled";
-        if (currentPage === maxPage) nextClass = "disabled";
-        let temp_html = `<li class="page-item"><a class="page-link prevClass" onclick="read_all('${currentPage-1}')">전</a></li>
-                        <li class="page-item"><a class="page-link">${currentPage}</a></li>
-                        <li class="page-item"><a class="page-link nextClass" onclick="read_all('${currentPage+  1}'>후</a></li>`;
-        $("#page_nav").append(temp_html);
-    }
-
-    function goNewPost() {
-        getSelf();
-        location.href = "./newPost.html";
-    }
-
-</script>
+<script src="./api/board.js"></script>
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-    <title>하하하</title>
+    <link rel="icon" href="./css/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="./css/favicon.ico" type="image/x-icon" />
+    <title>BOARD MAIN</title>
 </head>
+
+<script>
+    function goNewPost() {
+        getSelf();
+        location.href = "./newPost.html";
+    }
+</script>
 
 <body>
     <div class="jumbotron" style="text-align: center;">
-        <h1 class="display-4">HeloOo worRrLd</h1>
+        <h1 class="display-4">board ver_2</h1>
         <hr class="my-4">
         <button onclick="logout()" class="btn btn-outline-warning">로그아웃</button>
         <button onclick="isMember()" class="btn btn-outline-success">로그인</button>
-        <button onclick="goNewPost()" type="button" class="btn btn-outline-info">새 글 작성</button>
-        <button type="button" class="btn btn-outline-secondary">내 글 보기</button>
+        <button onclick="getSelf()" type="button" class="btn btn-outline-info">새 글 작성</button>
+        <!-- <button type="button" class="btn btn-outline-secondary">내 글 보기</button>
         <button type="button" class="btn btn-outline-secondary">조회수 순</button>
-        <button type="button" class="btn btn-outline-secondary">추천수 순</button>
+        <button type="button" class="btn btn-outline-secondary">추천수 순</button> -->
     </div>
 
     <div class="container">

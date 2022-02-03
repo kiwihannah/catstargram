@@ -7,7 +7,6 @@ const nowDateTime = new Date().toLocaleString('ko-KR', { timeZone: 'UTC' });
 
 router.post("/user/new", async (req, res) => {
   const { user_id, user_pw } = req.body;
-  alert(user_id, user_pw)
   await User.create({ user_id, user_pw, reg_date : nowDateTime });
   console.log("[Router : registerUser]");
   res.status(201).json({ });

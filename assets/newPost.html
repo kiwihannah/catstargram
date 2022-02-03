@@ -11,8 +11,28 @@
     crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
 
-<head></head>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="icon" href="./css/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="./css/favicon.ico" type="image/x-icon" />
+    <title>NEW</title>
+</head>
+
 <script>
+    function logout() {
+        if (localStorage.getItem("user_id") === null) {
+            alert("이미 로그아웃 상태 입니다."); return;
+        }
+        alert("로그아웃 되었습니다.");
+        localStorage.clear();
+        window.location.href = "./board.html";
+    }
+
+    function isMember() {
+        let user_id = localStorage.getItem("user_id");
+        user_id !== null ? alert(`이미 로그인 된 상태입니다\n아이디: ${user_id}`) : window.location.href = "./register.html";
+    }
     $(document).ready(function() {
         let user_id = localStorage.getItem("user_id");
         $("#user_id").append(user_id);
@@ -35,8 +55,7 @@
         <h1 class="display-4">HeloOo worRrLd</h1>
         <hr class="my-4">
         <button onclick="logout()" class="btn btn-outline-warning">로그아웃</button>
-        <button onclick="getSelf()" class="btn btn-outline-secondary">dev_test</button>
-        <button onclick="location.href='register.html'" class="btn btn-outline-success">로그인</button>
+        <button onclick="isMember()" class="btn btn-outline-success">로그인</button>
     </div>
 
     <div class="container">
