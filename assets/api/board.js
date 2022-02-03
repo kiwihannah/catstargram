@@ -4,6 +4,11 @@ $(document).ready(function () {
     read_all(); 
 });
 
+function goNewPost() {
+    getSelf();
+    location.href = "./newPost.html";
+}
+
 function logout() {
     if (localStorage.getItem("user_id") === null) {
         alert("이미 로그아웃 상태 입니다."); return;
@@ -75,6 +80,7 @@ function addList(posts) {
 
 function goModify(post_no) {
     localStorage.setItem("post_no", post_no);
+    $.ajax({ type: "PUT", url: `/api/posts/hit/${post_no}`, success: function (response) {} });
     window.location.href = "./modify.html";
 }
 

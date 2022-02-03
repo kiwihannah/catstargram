@@ -96,4 +96,20 @@ router.delete("/replies/one/:cmt_no", async (req, res) => {
   res.status(200).send({ });
 });
 
+router.put("/posts/hit/:post_no", async (req, res) => {
+  const { post_no } = req.params; 
+  let [hit] = await Post.find({post_no}); 
+  let nowHit = 0; nowHit = hit["hit"]; let nextHit = 0; nextHit = nowHit + 1;
+  await Post.updateOne({ post_no }, {$set: { hit : nextHit, },});
+  res.status(201).send({ });
+});
+
+router.put("/posts/like/:post_no", async (req, res) => {
+  const { post_no } = req.params;
+  let [like] = await Post.find({post_no});
+  let nowLike = 0; nowLike = like["like"]; let nextLike = 0; nextLike = nowLike + 1;
+  await Post.updateOne({ post_no }, {$set: { like : nextLike, },});
+  res.status(201).send({ });
+});
+
 module.exports = router;
