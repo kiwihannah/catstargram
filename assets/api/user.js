@@ -70,6 +70,7 @@ function register() {
     let user_id = $("#reg-user-id").val();
     let user_pw = $("#reg-user-pw").val();
     let user_pw2 = $("#reg-user-pw-confirm").val();
+    console.log(user_id, user_pw);
     null_check( user_id, user_pw, user_pw2);
     
     $.ajax({
@@ -88,8 +89,9 @@ function register() {
 }
 
 function login() {
-    let user_id = $("#login-user_id").val();
+    let user_id = $("#login-user-id").val();
     let user_pw = $("#login-user-pw").val();
+    console.log(user_id, user_pw)
     if (user_id === "" || user_pw === "") {
         alert("필요한 정보를 모두 입력해 주세요");
         return false;
