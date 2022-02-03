@@ -47,16 +47,16 @@ function getSelf() {
 }
 
 function read_all(page) {
-    if (page === 0) page = 1;
+    if (page < 0 || page === undefined) page = 1;
     $.ajax({
         type: "GET",
         url: `/api/posts?page=${page}`,
         data: {},
         success: function (response) {
             let posts = response["posts"];
-            let currentPage = response["currentPage"];
+            let nowPage = response["nowPage"];
             let maxPage = response["maxPage"];
-            pagination(currentPage, maxPage);
+            pagination(nowPage, maxPage);
             for (let i = 0; i < posts.length; i++) {
                 addList(posts[i]);
             }
@@ -86,11 +86,13 @@ function goModify(post_no) {
 
 function pagination(currentPage, maxPage) {
     $("#page_nav").empty(); $("#list").empty();
+    let prevPage = currentPage - 1;
+    let nextPage = currentPage + 1;
     let prevClass = "", nextClass = "";
     if (currentPage === 1) prevClass = "disabled";
     if (currentPage === maxPage) nextClass = "disabled";
-    let temp_html = `<li class="page-item"><a class="page-link prevClass" onclick="read_all('${currentPage-1}')">전</a></li>
-                    <li class="page-item"><a class="page-link">${currentPage}</a></li>
-                    <li class="page-item"><a class="page-link nextClass" onclick="read_all('${currentPage+  1}'>후</a></li>`;
+    let temp_html = `<li class="page-item ${prevClass}"><a class="page-link" onclick="read_all('${prevPage}')"> 이전 </a></li>
+                    <li class="page-item"><span class="page-link"> [ ${currentPage} ] <span class="sr-only">(current)</span></span></li>
+                    <li class="page-item ${nextClass}"><a class="page-link" onclick="read_all('${nextPage}')"> 다음 </a></li>`;
     $("#page_nav").append(temp_html);
-}
+  }

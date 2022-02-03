@@ -13,18 +13,14 @@ router.post("/posts", async (req, res) => {
 });
 
 router.get("/posts", async function (req, res) {
-  let page = Math.max(1, parseInt(req.query.page)); // string -> int
-  let limit = 10;
-
-  page = !isNaN(page) ? page : 1;
-  let skip = (page - 1) * limit;
+  let nowPage = Math.max(1, parseInt(req.query.page)); // string -> int
+  let limit = 5;
+  let skip = (nowPage - 1) * limit;
   let count = await Post.countDocuments({});
   let maxPage = Math.ceil(count / limit);
-
   const posts = await Post.find({}).sort({ ins_date : -1 }).skip(skip).limit(limit).exec();
-
   console.log("[Router : READ ALL]");
-  res.status(200).json({ posts: posts, currentPage: page, maxPage: maxPage });
+  res.status(200).json({ posts, nowPage , maxPage });
 });
 
  router.get("/posts/one/:post_no", async (req, res) => {
@@ -34,16 +30,6 @@ router.get("/posts", async function (req, res) {
   console.log("[Router : READ ONE]", post_no);
   res.json({ post });
 });
-
-// router.get("/posts/member/:member_no", async (req, res) => {
-//   const member_no = req.params.member_no; /* 하나만 가져오는데 {} deconstruction 할 필요 없음 */
-//   const post = await Post.find({ member_no });
-//   if (!post) {
-//     return res.status(400).json({ success: false, errorMessage: "Cannot read an empty article" });
-//   }
-//   console.log("[Router : READ MEMBER POSTS]", member_no);
-//   res.json({ post });
-// });
 
 router.put("/posts/one/:post_no", async (req, res) => {
   const post_no = req.params.post_no; const { title, context } = req.body;
@@ -105,9 +91,11 @@ router.put("/posts/hit/:post_no", async (req, res) => {
 });
 
 router.put("/posts/like/:post_no", async (req, res) => {
-  const { post_no } = req.params;
+  const { post_no } = req.params; const { val } = req.body;
+  console.log(val);
   let [like] = await Post.find({post_no});
-  let nowLike = 0; nowLike = like["like"]; let nextLike = 0; nextLike = nowLike + 1;
+  let nowLike = 0; nowLike = like["like"]; 
+  let nextLike = 0; nextLike = nowLike + Number(val);
   await Post.updateOne({ post_no }, {$set: { like : nextLike, },});
   res.status(201).send({ });
 });
