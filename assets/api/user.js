@@ -5,6 +5,7 @@ $(document).ready(function() {
 function null_check( id, pw1, pw2){
     if (id === "" || pw1 === "" || pw2 === "") {
         alert("필요정보를 모두 입력해 주세요.");
+        $("#btn-login").classList.add("disabled");
         return false;
     }
 }
@@ -20,10 +21,12 @@ function validate_pw() {
         $("#pw-alert-1").empty();
         $("#pw-alert-1").append("<p style='color:red'>최소 3자 이상, 알파벳 대소문자(a~z, A~Z), 숫자(0~9)</p>");
         $("#reg-user-pw").val("").focus();
+        $("#btn-login").classList.add("disabled");
     } else if($("#reg-user-pw").val() === ($("#reg-user-id").val())) {
         $("#pw-alert-1").empty();
         $("#pw-alert-1").append("<p style='color:red'>비밀번호는 아이디와 동일하게 입력할 수 없다.</p>");
         $("#reg-user-pw").val("").focus();
+        $("#btn-login").classList.add("disabled");
     } else {
         $("#pw-alert-1").empty();
     }			
@@ -34,6 +37,7 @@ function dup_pw() {
         $("#pw-alert-2").empty();
         $("#pw-alert-2").append("<p style='color:red'>비밀번호가 일치하지 않습니다.</p>");
         $("#reg-user-pw-confirm").val("").focus();
+        $("#btn-login").classList.add("disabled");
     } else {
         $("#pw-alert-2").empty();
     }
