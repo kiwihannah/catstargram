@@ -1,109 +1,99 @@
 const express = require("express");
 const Post = require("../models/post");
+const Reply = require("../models/reply");
 const User = require("../models/user");
 const router = express.Router();
 const nowDateTime = new Date().toLocaleString('ko-KR', { timeZone: 'UTC' });
-/**
- * 0. create - method : post
- * member_no, title, context, img_url, like, mention, ins_date, upd_date
- **/ 
+
 router.post("/posts", async (req, res) => {
-  const { title_give, context_give, img_url_give, mention_give } = req.body;
-  const createPost = await Post.create({
-    member_no : 1,
-    title     : title_give,
-    context   : context_give,
-    img_url   : img_url_give,
-    like      : 0,
-    mention   : mention_give, /*array, not required*/
-    ins_date  : nowDateTime,
-    upd_date  : nowDateTime,
-  });
+  const { user_id, title, context } = req.body;
+  await Post.create({ user_id, title, context, hit : 0, like : 0, ins_date  : nowDateTime, upd_date  : nowDateTime, });
   console.log("[Router : createPost]");
-  res.json({ post: createPost });
+  res.status(201).json({ });
 });
 
-/**
- * 1. read All
- */
 router.get("/posts", async function (req, res) {
   let page = Math.max(1, parseInt(req.query.page)); // string -> int
-  let limit = 5;
+  let limit = 10;
 
   page = !isNaN(page) ? page : 1;
   let skip = (page - 1) * limit;
   let count = await Post.countDocuments({});
   let maxPage = Math.ceil(count / limit);
 
-  const posts = await Post.find({}).sort({ ins_date : -1 });
-  //.skip(skip).limit(limit).exec();
+  const posts = await Post.find({}).sort({ ins_date : -1 }).skip(skip).limit(limit).exec();
 
   console.log("[Router : READ ALL]");
-  res.json({ posts: posts, currentPage: page, maxPage: maxPage });
+  res.status(200).json({ posts: posts, currentPage: page, maxPage: maxPage });
 });
 
-/**
- * 2. read ONE
- */
- router.get("/post/one/:post_no", async (req, res) => {
-  const post_no = req.params.post_no; /* 하나만 가져오는데 {} deconstruction 할 필요 없음 */
+ router.get("/posts/one/:post_no", async (req, res) => {
+  const post_no = req.params.post_no; 
   const post = await Post.findOne({ post_no });
-  if (!post) {
-    return res.status(400).json({ success: false, errorMessage: "Cannot read an empty article" });
-  }
+  if (!post) { return res.status(400).json({ success: false, msg: "해당 게시글을 불러오지 못했습니다." }); }
   console.log("[Router : READ ONE]", post_no);
   res.json({ post });
 });
 
-/**
- * 3. read many by member_no
- */
-router.get("/posts/member/:member_no", async (req, res) => {
-  const member_no = req.params.member_no; /* 하나만 가져오는데 {} deconstruction 할 필요 없음 */
-  const post = await Post.find({ member_no });
-  if (!post) {
-    return res.status(400).json({ success: false, errorMessage: "Cannot read an empty article" });
-  }
-  console.log("[Router : READ MEMBER POSTS]", member_no);
-  res.json({ post });
-});
+// router.get("/posts/member/:member_no", async (req, res) => {
+//   const member_no = req.params.member_no; /* 하나만 가져오는데 {} deconstruction 할 필요 없음 */
+//   const post = await Post.find({ member_no });
+//   if (!post) {
+//     return res.status(400).json({ success: false, errorMessage: "Cannot read an empty article" });
+//   }
+//   console.log("[Router : READ MEMBER POSTS]", member_no);
+//   res.json({ post });
+// });
 
-/**
- * 4. update
- * member_no, title, context, img_url, like, mention, ins_date, upd_date
- **/ 
-router.put("/post/:post_no", async (req, res) => {
-  const post_no = req.params.post_no;
-  const { title_give, context_give, img_url_give, mention_give } = req.body;
+router.put("/posts/one/:post_no", async (req, res) => {
+  const post_no = req.params.post_no; const { title, context } = req.body;
   const post = await Post.findOne({ post_no });
-  if(post) {
-    await Post.updateOne(
-      { post_no: post_no },
-      {$set: 
-        {title: title_give, context: context_give, img_url: img_url_give, 
-          mention: mention_give, upd_date: nowDateTime,},
-      }
-    );
-    res.json({ result: "success" });
+  if( post ) { 
+    await Post.updateOne({ post_no }, {$set: { title, context, },});
+    res.status(200).json({ });
   } else {
-    res.status(400).json({ result: "NO DATA" }); 
+    res.status(400).json({ }); 
   }
   console.log("[Router : MODIFY ONE]", post_no);
 });
 
-/**
- * 5. delete filtered by post_no
-*/
-router.delete("/post/:post_no", async (req, res) => {
+router.delete("/posts/:post_no", async (req, res) => {
   const post_no = req.params.post_no;
   const post = await Post.findOne({ post_no });
-  if (post) {
-    await Post.deleteOne({ post_no });
-    res.json({ result: "success" });
-  } else {
-    res.status(400).json({ result: "NO DATA" });
-  }
-  
+
+  if (post) { await Post.deleteOne({ post_no }); res.status(200).json({ }); } 
+  else { res.status(400).json({ }); }
+});
+
+router.post("/replies", async (req, res) => {
+  const { post_no, user_id, cmt } = req.body;
+  await Reply.create({ post_no, user_id, cmt, ins_date  : nowDateTime });
+  console.log("[Router : cmted]");
+  res.status(201).json({ });
+});
+
+router.get("/replies/:post_no", async (req, res) => {
+  const { post_no } = req.params;
+  console.log(post_no);
+  let replies = await Reply.find({post_no}).sort({ ins_date : -1 }).exec();
+  res.send({ replies });
+});
+
+router.get("/replies/one/:post_no/:cmt_no", async (req, res) => {
+  const { post_no, cmt_no } = req.params; 
+  let reply = await Reply.find({ post_no, cmt_no }).exec(); 
+  res.send({reply}); 
+});
+
+router.put("/replies/one/:cmt_no", async (req, res) => {
+  const { cmt_no } = req.params; const { cmt } = req.body;
+  await Reply.updateOne({ cmt_no }, {$set: { cmt, },});
+  res.status(201).send({ });
+});
+
+router.delete("/replies/one/:cmt_no", async (req, res) => {
+  const { cmt_no } = req.params; await Reply.deleteOne({ cmt_no });
+  res.status(200).send({ });
 });
 
 module.exports = router;

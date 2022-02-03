@@ -2,7 +2,7 @@
 const express = require('express');
 const conn = require("./models/index");
 const bodyParser = require('body-parser');
-const port = 3000;
+const port = 4000;
 const app = express();
 
 /* connecting mongodb */

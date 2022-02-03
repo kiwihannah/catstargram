@@ -13,7 +13,7 @@ function getSelf(callback) {
         alert("로그인이 필요합니다.");
       } else {
         localStorage.clear();
-        alert("알 수 없는 문제가 발생했습니다. 관리자에게 문의하세요.");
+        alert("로그인이 필요합니다.");
       }
       window.location.href = "/";
     },
