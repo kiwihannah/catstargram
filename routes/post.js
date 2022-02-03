@@ -2,6 +2,7 @@ const express = require("express");
 const Post = require("../models/post");
 const Reply = require("../models/reply");
 const User = require("../models/user");
+const Like = require("../models/like");
 const router = express.Router();
 const nowDateTime = new Date().toLocaleString('ko-KR', { timeZone: 'UTC' });
 
@@ -82,6 +83,12 @@ router.delete("/replies/one/:cmt_no", async (req, res) => {
   res.status(200).send({ });
 });
 
+router.get("/isExistLike/:user_id/:post_no", async (req, res) => {
+  const { user_id, post_no } = req.params;
+  let isExist = await Like.find({ $and: [ { user_id }, { post_no } ] });
+  res.send({ isExist });
+});
+
 router.put("/posts/hit/:post_no", async (req, res) => {
   const { post_no } = req.params; 
   let [hit] = await Post.find({post_no}); 
@@ -91,12 +98,12 @@ router.put("/posts/hit/:post_no", async (req, res) => {
 });
 
 router.put("/posts/like/:post_no", async (req, res) => {
-  const { post_no } = req.params; const { val } = req.body;
-  console.log(val);
+  const { post_no } = req.params; const { val, user_id } = req.body;
   let [like] = await Post.find({post_no});
   let nowLike = 0; nowLike = like["like"]; 
   let nextLike = 0; nextLike = nowLike + Number(val);
   await Post.updateOne({ post_no }, {$set: { like : nextLike, },});
+  Number(val)===1 ? await Like.create({ user_id, post_no }) : await Like.deleteOne({ $and: [{ user_id }, { post_no }] });
   res.status(201).send({ });
 });
 

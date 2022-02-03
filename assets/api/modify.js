@@ -238,28 +238,35 @@ function getSelf(post_no) {
     },
   });
 }
+
 function like_it() {
-  if (localStorage.getItem("isLike") !== "Y") {
-    if (localStorage.getItem("user_id") !== null) {
-      let temp_dislike = `<button class="btn btn-secondary float-left" onclick="dislike_it()"><i class="fa fa-thumbs-down"> 취소</i></button>`;
-      $("#like-it").empty().append(temp_dislike);
-      let post_no = localStorage.getItem("post_no");
-      $.ajax({
-        type: "PUT",
-        url: `/api/posts/like/${post_no}`,
-        data: { val: +1 },
-        success: function (response) {
-          localStorage.setItem("isLike", "Y");
-        },
-      });
-    } else {
-      if (confirm("로그인이 필요합니다.\n로그인 합니까?")) {
-        location.href = "./register.html";
-      }
-    }
+  let post_no = localStorage.getItem("post_no");
+  let user_id = localStorage.getItem("user_id");
+
+  if (user_id !== null) {
+    $.ajax({
+      type: "GET",
+      url: `/api/isExistLike/${user_id}/${post_no}`,
+      success: function (response) {
+        if (response["isExist"].length === 0) {
+          let temp_dislike = `<button class="btn btn-secondary float-left" onclick="dislike_it()"><i class="fa fa-thumbs-down"> 취소</i></button>`;
+          $("#like-it").empty().append(temp_dislike);
+          $.ajax({
+            type: "PUT",
+            url: `/api/posts/like/${post_no}`,
+            data: { val: +1, user_id },
+            success: function (response) {},
+          });
+        } else {
+          if (confirm("이미 추천한 게시글 입니다.\n추천을 취소합니까?")) {
+            dislike_it();
+          }
+        }
+      },
+    });
   } else {
-    if (confirm("이미 추천한 게시글 입니다.\n추천을 취소합니까?")) {
-      dislike_it();
+    if (confirm("로그인이 필요합니다.\n로그인 합니까?")) {
+      location.href = "./register.html";
     }
   }
 }
@@ -267,12 +274,11 @@ function dislike_it() {
   let temp_like = `<button class="btn btn-danger float-left" onclick="like_it()"><i class="fa fa-thumbs-up"> 추천</i></button>`;
   $("#like-it").empty().append(temp_like);
   let post_no = localStorage.getItem("post_no");
+  let user_id = localStorage.getItem("user_id");
   $.ajax({
     type: "PUT",
     url: `/api/posts/like/${post_no}`,
-    data: { val: -1 },
-    success: function (response) {
-      localStorage.removeItem("isLike");
-    },
+    data: { val: -1, user_id },
+    success: function (response) {},
   });
 }
